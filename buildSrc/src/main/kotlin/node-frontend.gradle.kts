@@ -26,6 +26,11 @@ tasks.register<NpmTask>("npmBuild") {
     dependsOn("npmInstall")
     args.set(listOf("run", "build"))
     workingDir.set(projectDir)
+    environment.set(
+        mapOf(
+            "BUILD_PATH" to "frontend-build"
+        )
+    )
 }
 //
 //tasks.register<NpmTask>("npmTest") {

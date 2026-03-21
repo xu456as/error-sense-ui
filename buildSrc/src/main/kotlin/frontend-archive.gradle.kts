@@ -1,5 +1,6 @@
 import org.gradle.jvm.tasks.Jar
 import org.gradle.api.file.DuplicatesStrategy
+import java.io.File
 
 plugins {
     base
@@ -26,9 +27,7 @@ val frontendJar = tasks.register<Jar>("frontendJar") {
     archiveBaseName.set(project.name)
     archiveClassifier.set("")
 
-    from(layout.projectDirectory.dir("build")) {
-        exclude("libs/**")
-        exclude("tmp/**")
+    from(layout.projectDirectory.dir("frontend-build")) {
         into("/")
     }
 }
@@ -36,14 +35,20 @@ val frontendJar = tasks.register<Jar>("frontendJar") {
 val frontendSourcesJar = tasks.register<Jar>("frontendSourcesJar") {
     description = "Packages all git-tracked files as a sources JAR."
     group = "build"
+    dependsOn("npmInstall")
     notCompatibleWithConfigurationCache("Uses git ls-files to resolve tracked source inputs.")
 
     archiveBaseName.set(project.name)
     archiveClassifier.set("sources")
     duplicatesStrategy = DuplicatesStrategy.FAIL
 
-    from(layout.projectDirectory) {
-        include(trackedFilePatterns)
+    trackedFilePatterns.forEach { relativePath ->
+        val parentPath = File(relativePath).parent
+        from(layout.projectDirectory.file(relativePath)) {
+            if (parentPath != null) {
+                into(parentPath)
+            }
+        }
     }
 }
 

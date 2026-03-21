@@ -25,6 +25,7 @@ npm start
 ```
 
 The app uses `REACT_APP_API_BASE_URL=http://localhost:9090/api` in local development.
+The login flow is token-based: the UI calls the mock login API, stores the returned token, and sends it as a bearer token on later API calls.
 
 ## Gradle
 
@@ -43,18 +44,41 @@ Available Gradle tasks:
 ./gradlew npmBuild
 ./gradlew npmTest
 ./gradlew npmStart
+./gradlew frontendJar
+./gradlew frontendSourcesJar
+./gradlew assemble
+./gradlew release --no-configuration-cache
 ```
 
 The Node integration is configured to use the local Node runtime from `nvm` rather than downloading a separate Node distribution.
+
+Archive outputs:
+
+- `frontendJar`: packages the npm `build/` output as the main JAR artifact
+- `frontendSourcesJar`: packages all git-tracked files as the sources JAR
+
+`frontendSourcesJar` uses `git ls-files`, so if Gradle reports configuration-cache incompatibility, run it with:
+
+```bash
+./gradlew frontendSourcesJar --no-configuration-cache
+```
+
+Project versioning is driven by `gradle.properties`.
 
 ## Mock APIs
 
 WireMock mappings live in [`wiremock/mappings`](/data/Git/error-sense-ui/wiremock/mappings).
 
-- `GET /api/developer-reports`
-- `GET /api/reviewer-reports`
-- `PUT /api/reviewer-reports/:id`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/errsense/report/dev-summary`
+- `GET /api/v1/errsense/report/owner-review`
+- `PUT /api/v1/errsense/report/owner-review/:id`
 - Generic `OPTIONS /api/*` preflight handler for local CORS
+
+Mock login response:
+
+- returns a bearer token: `mock-errsense-token`
+- report APIs require `Authorization: Bearer mock-errsense-token`
 
 ## Build
 
@@ -67,6 +91,42 @@ Or with Gradle:
 ```bash
 ./gradlew npmBuild
 ```
+
+## Publishing
+
+The Gradle build is configured for Maven Central publishing with:
+
+- `maven-publish`
+- `signing`
+- `io.github.gradle-nexus.publish-plugin`
+- `net.researchgate.release`
+
+Publish flow:
+
+```bash
+./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-configuration-cache
+```
+
+Required environment variables:
+
+- `OSSRH_USERNAME`
+- `OSSRH_PASSWORD`
+- `SIGNING_KEY_FILE`
+- `SIGNING_KEY_PASSWORD`
+
+Release flow:
+
+```bash
+./gradlew release --no-configuration-cache
+```
+
+The release plugin:
+
+- reads and updates the version from `gradle.properties`
+- publishes to Sonatype
+- closes and releases the Sonatype staging repository
+- creates a Git tag using `<project-name>-<version>`
+- requires releases to run from the `master` branch
 
 ## Docker
 
@@ -100,4 +160,14 @@ Login example:
 
 ```bash
 echo "$GITHUB_TOKEN" | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+```
+
+## GitHub Actions
+
+GitHub Actions builds and pushes the container image to GHCR using the first 8 characters of the commit SHA as the tag.
+
+Example tag:
+
+```text
+ghcr.io/openprojectx/error-sense-ui:5a9619ee
 ```
