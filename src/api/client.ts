@@ -19,12 +19,15 @@ function buildUrl(path: string, params?: Record<string, string>) {
 }
 
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
+  const headers = new Headers(options.headers ?? {});
+
+  if (options.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
   const response = await fetch(buildUrl(path, options.params), {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers ?? {}),
-    },
+    headers,
   });
 
   if (!response.ok) {

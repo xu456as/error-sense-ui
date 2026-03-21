@@ -33,6 +33,7 @@ WireMock mappings live in [`wiremock/mappings`](/data/Git/error-sense-ui/wiremoc
 - `GET /api/developer-reports`
 - `GET /api/reviewer-reports`
 - `PUT /api/reviewer-reports/:id`
+- Generic `OPTIONS /api/*` preflight handler for local CORS
 
 ## Build
 
