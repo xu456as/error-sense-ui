@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { fetchDeveloperReports } from '../api/reports';
 import { PageHeader } from '../components/PageHeader';
 import { DeveloperFilters, DeveloperReportItem } from '../types/report';
+import { downloadCsv } from '../utils/export';
 
 const defaultFilters: DeveloperFilters = {
   appId: '',
@@ -73,6 +74,22 @@ export function DeveloperReportPage() {
     };
   }, [filters]);
 
+  const handleExport = () => {
+    downloadCsv(
+      'developer-report.csv',
+      ['No.', 'Id', 'Error Pattern', 'Appear Times', 'Root Cause Analysis', 'Suggestion', 'Critical Level'],
+      items.map((item, index) => [
+        index + 1,
+        item.id,
+        item.errorPattern,
+        item.appearTimes,
+        item.rootCauseAnalysis,
+        item.suggestion,
+        item.criticalLevel,
+      ])
+    );
+  };
+
   return (
     <Stack spacing={3}>
       <PageHeader
@@ -108,6 +125,9 @@ export function DeveloperReportPage() {
           >
             Search
           </Button>
+          <Button variant="outlined" onClick={handleExport} sx={{ minWidth: { md: 140 } }}>
+            Export CSV
+          </Button>
         </Stack>
       </Paper>
       {error ? <Alert severity="error">{error}</Alert> : null}
@@ -116,6 +136,7 @@ export function DeveloperReportPage() {
           <TableHead>
             <TableRow>
               <TableCell>No.</TableCell>
+              <TableCell>Id</TableCell>
               <TableCell>Error Pattern</TableCell>
               <TableCell>Appear Times</TableCell>
               <TableCell>Root Cause Analysis</TableCell>
@@ -127,6 +148,7 @@ export function DeveloperReportPage() {
             {items.map((item, index) => (
               <TableRow key={item.id} hover>
                 <TableCell>{index + 1}</TableCell>
+                <TableCell>{item.id}</TableCell>
                 <TableCell>{item.errorPattern}</TableCell>
                 <TableCell>{item.appearTimes}</TableCell>
                 <TableCell>{item.rootCauseAnalysis}</TableCell>
@@ -142,12 +164,12 @@ export function DeveloperReportPage() {
             ))}
             {!loading && items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6}>No reports matched the current search conditions.</TableCell>
+                <TableCell colSpan={7}>No reports matched the current search conditions.</TableCell>
               </TableRow>
             ) : null}
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6}>Loading developer reports...</TableCell>
+                <TableCell colSpan={7}>Loading developer reports...</TableCell>
               </TableRow>
             ) : null}
           </TableBody>

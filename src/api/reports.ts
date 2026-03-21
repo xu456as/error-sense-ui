@@ -2,6 +2,7 @@ import {
   DeveloperFilters,
   DeveloperReportItem,
   ReviewerApproveStatus,
+  ReviewerFilters,
   ReviewerReportItem,
 } from '../types/report';
 import { apiFetch } from './client';
@@ -18,8 +19,8 @@ export function fetchDeveloperReports(filters: DeveloperFilters) {
   return apiFetch<DeveloperResponse>('/developer-reports', { params: filters });
 }
 
-export function fetchReviewerReports() {
-  return apiFetch<ReviewerResponse>('/reviewer-reports');
+export function fetchReviewerReports(filters: ReviewerFilters) {
+  return apiFetch<ReviewerResponse>('/reviewer-reports', { params: filters });
 }
 
 export function updateReviewerReport(

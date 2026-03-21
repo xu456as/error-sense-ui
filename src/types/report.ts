@@ -17,6 +17,10 @@ export type DeveloperFilters = {
 
 export type ReviewerApproveStatus = 'Resolved' | 'ExistLowImpact';
 
+export type ReviewerFilters = {
+  taskId: string;
+};
+
 export type ReviewerReportItem = {
   id: number;
   errorPattern: string;

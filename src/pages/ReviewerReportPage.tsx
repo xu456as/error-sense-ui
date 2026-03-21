@@ -15,11 +15,17 @@ import MenuItem from '@mui/material/MenuItem';
 import { useEffect, useState } from 'react';
 import { fetchReviewerReports, updateReviewerReport } from '../api/reports';
 import { PageHeader } from '../components/PageHeader';
-import { ReviewerApproveStatus, ReviewerReportItem } from '../types/report';
+import { ReviewerApproveStatus, ReviewerFilters, ReviewerReportItem } from '../types/report';
+import { downloadCsv } from '../utils/export';
 
 const statusOptions: ReviewerApproveStatus[] = ['Resolved', 'ExistLowImpact'];
+const defaultFilters: ReviewerFilters = {
+  taskId: '',
+};
 
 export function ReviewerReportPage() {
+  const [filters, setFilters] = useState<ReviewerFilters>(defaultFilters);
+  const [draftFilters, setDraftFilters] = useState<ReviewerFilters>(defaultFilters);
   const [items, setItems] = useState<ReviewerReportItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState<number | null>(null);
@@ -33,7 +39,7 @@ export function ReviewerReportPage() {
       setError('');
 
       try {
-        const response = await fetchReviewerReports();
+        const response = await fetchReviewerReports(filters);
         if (active) {
           setItems(response.items);
         }
@@ -53,7 +59,7 @@ export function ReviewerReportPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [filters]);
 
   const handleChange = <K extends keyof ReviewerReportItem>(
     id: number,
@@ -86,17 +92,63 @@ export function ReviewerReportPage() {
     }
   };
 
+  const handleExport = () => {
+    downloadCsv(
+      'reviewer-report.csv',
+      [
+        'No.',
+        'Id',
+        'Error Pattern',
+        'Last Seen In UAT',
+        'Owner Approve Status',
+        'App Owner Explanation',
+        'What to do if it happens in Prod?',
+      ],
+      items.map((item, index) => [
+        index + 1,
+        item.id,
+        item.errorPattern,
+        item.lastSeenInUat,
+        item.ownerApproveStatus,
+        item.appOwnerExplanation,
+        item.prodAction,
+      ])
+    );
+  };
+
   return (
     <Stack spacing={3}>
       <PageHeader
         title="Reviewer Report"
         subtitle="Review the latest UAT findings, approve disposition, and capture production response guidance."
       />
+      <Paper sx={{ p: 3 }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+          <TextField
+            label="Task Id"
+            value={draftFilters.taskId}
+            onChange={(event) => setDraftFilters((current) => ({ ...current, taskId: event.target.value }))}
+            fullWidth
+          />
+          <Button
+            variant="contained"
+            onClick={() => setFilters(draftFilters)}
+            sx={{ minWidth: { md: 140 } }}
+          >
+            Search
+          </Button>
+          <Button variant="outlined" onClick={handleExport} sx={{ minWidth: { md: 140 } }}>
+            Export CSV
+          </Button>
+        </Stack>
+      </Paper>
       {error ? <Alert severity="error">{error}</Alert> : null}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>No.</TableCell>
+              <TableCell>Id</TableCell>
               <TableCell>Error Pattern</TableCell>
               <TableCell>Last Seen In UAT</TableCell>
               <TableCell>Owner Approve Status</TableCell>
@@ -106,8 +158,10 @@ export function ReviewerReportPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map((item) => (
+            {items.map((item, index) => (
               <TableRow key={item.id} hover>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{item.id}</TableCell>
                 <TableCell sx={{ minWidth: 220 }}>{item.errorPattern}</TableCell>
                 <TableCell sx={{ minWidth: 140 }}>{item.lastSeenInUat}</TableCell>
                 <TableCell sx={{ minWidth: 180 }}>
@@ -163,12 +217,12 @@ export function ReviewerReportPage() {
             ))}
             {!loading && items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6}>No reviewer reports available.</TableCell>
+                <TableCell colSpan={8}>No reviewer reports available.</TableCell>
               </TableRow>
             ) : null}
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6}>Loading reviewer reports...</TableCell>
+                <TableCell colSpan={8}>Loading reviewer reports...</TableCell>
               </TableRow>
             ) : null}
           </TableBody>
