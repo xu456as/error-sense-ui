@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPattern": "/api/reviewer-reports/[0-9]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
+    },
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "id": "{{request.pathSegments.[2]}}",
+      "errorPattern": "Updated locally in WireMock",
+      "lastSeenInUat": "2026-03-21 10:00 UTC",
+      "ownerApproveStatus": "{{jsonPath request.body '$.ownerApproveStatus'}}",
+      "appOwnerExplanation": "{{jsonPath request.body '$.appOwnerExplanation'}}",
+      "prodAction": "{{jsonPath request.body '$.prodAction'}}"
+    }
+  }
+}
