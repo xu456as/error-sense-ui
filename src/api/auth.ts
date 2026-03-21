@@ -5,12 +5,15 @@ type LoginResponse = {
   token: string;
 };
 
-export function loginWithPassword(email: string, password: string) {
+type LoginPayload = {
+  email: string;
+  password: string;
+  oneTimePassword?: string;
+};
+
+export function loginWithPassword(payload: LoginPayload) {
   return apiFetch<LoginResponse>('/v1/auth/login', {
     method: 'POST',
-    body: JSON.stringify({
-      email,
-      password,
-    }),
+    body: JSON.stringify(payload),
   });
 }

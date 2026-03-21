@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, FormControlLabel, Paper, Stack, Switch, TextField, Typography } from '@mui/material';
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
@@ -8,6 +8,8 @@ export function LoginPage() {
   const { login } = useAppContext();
   const [email, setEmail] = useState('developer@errsense.io');
   const [password, setPassword] = useState('password');
+  const [otpEnabled, setOtpEnabled] = useState(false);
+  const [oneTimePassword, setOneTimePassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -23,7 +25,7 @@ export function LoginPage() {
     setError('');
 
     try {
-      await login(email, password);
+      await login(email, password, otpEnabled ? oneTimePassword : undefined);
       navigate('/developer-report');
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : 'Login failed');
@@ -80,7 +82,8 @@ export function LoginPage() {
               Sign in
             </Typography>
             <Typography color="text.secondary" sx={{ mb: 3 }}>
-              Use the mock login API to retrieve a token and enter the local workspace.
+              Password is required. One-time password is optional and can be used as an
+              additional factor.
             </Typography>
             <Box component="form" onSubmit={handleSubmit}>
               <Stack spacing={2.5}>
@@ -98,7 +101,32 @@ export function LoginPage() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   fullWidth
+                  required
                 />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={otpEnabled}
+                      onChange={(event) => {
+                        const nextChecked = event.target.checked;
+                        setOtpEnabled(nextChecked);
+                        if (!nextChecked) {
+                          setOneTimePassword('');
+                        }
+                      }}
+                    />
+                  }
+                  label="Use one-time password"
+                />
+                {otpEnabled ? (
+                  <TextField
+                    label="One-Time Password"
+                    value={oneTimePassword}
+                    onChange={(event) => setOneTimePassword(event.target.value)}
+                    helperText="Optional additional factor"
+                    fullWidth
+                  />
+                ) : null}
                 <Button type="submit" variant="contained" size="large" disabled={submitting}>
                   {submitting ? 'Signing in...' : 'Enter dashboard'}
                 </Button>

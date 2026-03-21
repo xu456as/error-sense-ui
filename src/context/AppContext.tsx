@@ -10,7 +10,7 @@ type User = {
 type AppContextValue = {
   isAuthenticated: boolean;
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, oneTimePassword?: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -23,8 +23,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => ({
       isAuthenticated: Boolean(user),
       user,
-      login: async (email: string, password: string) => {
-        const response = await loginWithPassword(email, password);
+      login: async (email: string, password: string, oneTimePassword?: string) => {
+        const response = await loginWithPassword({
+          email,
+          password,
+          oneTimePassword: oneTimePassword || undefined,
+        });
         setApiToken(response.token);
         setUser({
           email: response.email,
