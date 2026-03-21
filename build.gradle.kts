@@ -1,5 +1,6 @@
 plugins {
     id("node-frontend")
+    id("frontend-archive")
     id("frontend-jib")
 }
 
