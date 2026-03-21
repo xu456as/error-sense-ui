@@ -15,12 +15,12 @@ type ReviewerResponse = {
   items: ReviewerReportItem[];
 };
 
-export function fetchDeveloperReports(filters: DeveloperFilters) {
-  return apiFetch<DeveloperResponse>('/developer-reports', { params: filters });
+export function fetchDeveloperReports(filters: DeveloperFilters, signal?: AbortSignal) {
+  return apiFetch<DeveloperResponse>('/developer-reports', { params: filters, signal });
 }
 
-export function fetchReviewerReports(filters: ReviewerFilters) {
-  return apiFetch<ReviewerResponse>('/reviewer-reports', { params: filters });
+export function fetchReviewerReports(filters: ReviewerFilters, signal?: AbortSignal) {
+  return apiFetch<ReviewerResponse>('/reviewer-reports', { params: filters, signal });
 }
 
 export function updateReviewerReport(

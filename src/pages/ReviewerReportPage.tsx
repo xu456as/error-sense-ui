@@ -12,9 +12,10 @@ import {
   TextField,
 } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
-import { useEffect, useState } from 'react';
+import { startTransition, useCallback, useState } from 'react';
 import { fetchReviewerReports, updateReviewerReport } from '../api/reports';
 import { PageHeader } from '../components/PageHeader';
+import { useReportRequest } from '../hooks/useReportRequest';
 import { ReviewerApproveStatus, ReviewerFilters, ReviewerReportItem } from '../types/report';
 import { downloadCsv } from '../utils/export';
 
@@ -23,43 +24,34 @@ const defaultFilters: ReviewerFilters = {
   taskId: '',
 };
 
+function areReviewerFiltersEqual(left: ReviewerFilters, right: ReviewerFilters) {
+  return left.taskId === right.taskId;
+}
+
 export function ReviewerReportPage() {
   const [filters, setFilters] = useState<ReviewerFilters>(defaultFilters);
   const [draftFilters, setDraftFilters] = useState<ReviewerFilters>(defaultFilters);
-  const [items, setItems] = useState<ReviewerReportItem[]>([]);
-  const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState<number | null>(null);
-  const [error, setError] = useState('');
+  const requestReviewerReports = useCallback(
+    (nextFilters: ReviewerFilters, signal: AbortSignal) =>
+      fetchReviewerReports(nextFilters, signal),
+    []
+  );
+  const { items, loading, error, setError, setItems } = useReportRequest(
+    filters,
+    requestReviewerReports,
+    'Failed to load reviewer reports'
+  );
 
-  useEffect(() => {
-    let active = true;
-
-    async function load() {
-      setLoading(true);
-      setError('');
-
-      try {
-        const response = await fetchReviewerReports(filters);
-        if (active) {
-          setItems(response.items);
-        }
-      } catch (loadError) {
-        if (active) {
-          setError(loadError instanceof Error ? loadError.message : 'Failed to load reviewer reports');
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
+  const handleSearch = () => {
+    if (areReviewerFiltersEqual(filters, draftFilters)) {
+      return;
     }
 
-    load();
-
-    return () => {
-      active = false;
-    };
-  }, [filters]);
+    startTransition(() => {
+      setFilters(draftFilters);
+    });
+  };
 
   const handleChange = <K extends keyof ReviewerReportItem>(
     id: number,
@@ -73,7 +65,6 @@ export function ReviewerReportPage() {
 
   const handleSave = async (item: ReviewerReportItem) => {
     setSavingId(item.id);
-    setError('');
 
     try {
       const updated = await updateReviewerReport(item.id, {
@@ -132,7 +123,7 @@ export function ReviewerReportPage() {
           />
           <Button
             variant="contained"
-            onClick={() => setFilters(draftFilters)}
+            onClick={handleSearch}
             sx={{ minWidth: { md: 140 } }}
           >
             Search

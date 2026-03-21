@@ -1,9 +1,17 @@
+import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AppShell } from './layout/AppShell';
-import { LoginPage } from './pages/LoginPage';
-import { DeveloperReportPage } from './pages/DeveloperReportPage';
-import { ReviewerReportPage } from './pages/ReviewerReportPage';
+
+const LoginPage = lazy(() =>
+  import('./pages/LoginPage').then((module) => ({ default: module.LoginPage }))
+);
+const DeveloperReportPage = lazy(() =>
+  import('./pages/DeveloperReportPage').then((module) => ({ default: module.DeveloperReportPage }))
+);
+const ReviewerReportPage = lazy(() =>
+  import('./pages/ReviewerReportPage').then((module) => ({ default: module.ReviewerReportPage }))
+);
 
 function ProtectedRoutes() {
   const { isAuthenticated } = useAppContext();
@@ -27,13 +35,15 @@ function AppRoutes() {
   const { isAuthenticated } = useAppContext();
 
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={isAuthenticated ? <Navigate to="/developer-report" replace /> : <LoginPage />}
-      />
-      <Route path="/*" element={<ProtectedRoutes />} />
-    </Routes>
+    <Suspense fallback={null}>
+      <Routes>
+        <Route
+          path="/login"
+          element={isAuthenticated ? <Navigate to="/developer-report" replace /> : <LoginPage />}
+        />
+        <Route path="/*" element={<ProtectedRoutes />} />
+      </Routes>
+    </Suspense>
   );
 }
 

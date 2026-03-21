@@ -12,9 +12,10 @@ import {
   TableRow,
   TextField,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { startTransition, useCallback, useState } from 'react';
 import { fetchDeveloperReports } from '../api/reports';
 import { PageHeader } from '../components/PageHeader';
+import { useReportRequest } from '../hooks/useReportRequest';
 import { DeveloperFilters, DeveloperReportItem } from '../types/report';
 import { downloadCsv } from '../utils/export';
 
@@ -23,6 +24,14 @@ const defaultFilters: DeveloperFilters = {
   commitId: '',
   taskId: '',
 };
+
+function areDeveloperFiltersEqual(left: DeveloperFilters, right: DeveloperFilters) {
+  return (
+    left.appId === right.appId &&
+    left.commitId === right.commitId &&
+    left.taskId === right.taskId
+  );
+}
 
 function levelColor(level: DeveloperReportItem['criticalLevel']) {
   if (level === 'Critical') {
@@ -40,39 +49,26 @@ function levelColor(level: DeveloperReportItem['criticalLevel']) {
 export function DeveloperReportPage() {
   const [filters, setFilters] = useState<DeveloperFilters>(defaultFilters);
   const [draftFilters, setDraftFilters] = useState<DeveloperFilters>(defaultFilters);
-  const [items, setItems] = useState<DeveloperReportItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const requestDeveloperReports = useCallback(
+    (nextFilters: DeveloperFilters, signal: AbortSignal) =>
+      fetchDeveloperReports(nextFilters, signal),
+    []
+  );
+  const { items, loading, error } = useReportRequest(
+    filters,
+    requestDeveloperReports,
+    'Failed to load developer reports'
+  );
 
-  useEffect(() => {
-    let active = true;
-
-    async function load() {
-      setLoading(true);
-      setError('');
-
-      try {
-        const response = await fetchDeveloperReports(filters);
-        if (active) {
-          setItems(response.items);
-        }
-      } catch (loadError) {
-        if (active) {
-          setError(loadError instanceof Error ? loadError.message : 'Failed to load developer reports');
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
+  const handleSearch = () => {
+    if (areDeveloperFiltersEqual(filters, draftFilters)) {
+      return;
     }
 
-    load();
-
-    return () => {
-      active = false;
-    };
-  }, [filters]);
+    startTransition(() => {
+      setFilters(draftFilters);
+    });
+  };
 
   const handleExport = () => {
     downloadCsv(
@@ -120,7 +116,7 @@ export function DeveloperReportPage() {
           />
           <Button
             variant="contained"
-            onClick={() => setFilters(draftFilters)}
+            onClick={handleSearch}
             sx={{ minWidth: { md: 140 } }}
           >
             Search
