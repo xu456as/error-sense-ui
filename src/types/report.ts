@@ -2,11 +2,11 @@ export type CriticalLevel = 'Critical' | 'High' | 'Medium' | 'Low';
 
 export type DeveloperReportItem = {
   id: number;
-  errorPattern: string;
+  pattern: string;
   appearTimes: number;
   rootCauseAnalysis: string;
   suggestion: string;
-  criticalLevel: CriticalLevel;
+  level: CriticalLevel;
 };
 
 export type DeveloperFilters = {
@@ -23,9 +23,9 @@ export type ReviewerFilters = {
 
 export type ReviewerReportItem = {
   id: number;
-  errorPattern: string;
-  lastSeenInUat: string;
-  ownerApproveStatus: ReviewerApproveStatus;
-  appOwnerExplanation: string;
-  prodAction: string;
+  pattern: string;
+  lastAppearTime: string;
+  ownerApprovalStatus: ReviewerApproveStatus;
+  ownerExplanation: string;
+  actionInHigherEnv: string;
 };

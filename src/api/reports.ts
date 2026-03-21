@@ -8,19 +8,19 @@ import {
 import { apiFetch } from './client';
 
 type DeveloperResponse = {
-  items: DeveloperReportItem[];
+  errCases: DeveloperReportItem[];
 };
 
 type ReviewerResponse = {
-  items: ReviewerReportItem[];
+  errCases: ReviewerReportItem[];
 };
 
 export function fetchDeveloperReports(filters: DeveloperFilters, signal?: AbortSignal) {
-  return apiFetch<DeveloperResponse>('/developer-reports', { params: filters, signal });
+  return apiFetch<DeveloperResponse>('/v1/errsense/report/dev-summary', { params: filters, signal });
 }
 
 export function fetchReviewerReports(filters: ReviewerFilters, signal?: AbortSignal) {
-  return apiFetch<ReviewerResponse>('/reviewer-reports', { params: filters, signal });
+  return apiFetch<ReviewerResponse>('/v1/errsense/report/owner-review', { params: filters, signal });
 }
 
 export function updateReviewerReport(

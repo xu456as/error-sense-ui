@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
-type RequestFn<TFilters, TItem> = (filters: TFilters, signal: AbortSignal) => Promise<{ items: TItem[] }>;
+type RequestFn<TFilters, TItem> = (filters: TFilters, signal: AbortSignal) => Promise<{ errCases: TItem[] }>;
 
 type RequestState<TItem> = {
   error: string;
@@ -28,7 +28,7 @@ export function useReportRequest<TFilters, TItem>(
 
       try {
         const response = await request(filters, controller.signal);
-        setItems(response.items);
+        setItems(response.errCases);
       } catch (loadError) {
         if (controller.signal.aborted) {
           return;

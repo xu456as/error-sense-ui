@@ -33,7 +33,7 @@ function areDeveloperFiltersEqual(left: DeveloperFilters, right: DeveloperFilter
   );
 }
 
-function levelColor(level: DeveloperReportItem['criticalLevel']) {
+function levelColor(level: DeveloperReportItem['level']) {
   if (level === 'Critical') {
     return 'error';
   }
@@ -77,11 +77,11 @@ export function DeveloperReportPage() {
       items.map((item, index) => [
         index + 1,
         item.id,
-        item.errorPattern,
+        item.pattern,
         item.appearTimes,
         item.rootCauseAnalysis,
         item.suggestion,
-        item.criticalLevel,
+        item.level,
       ])
     );
   };
@@ -145,14 +145,14 @@ export function DeveloperReportPage() {
               <TableRow key={item.id} hover>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{item.id}</TableCell>
-                <TableCell>{item.errorPattern}</TableCell>
+                <TableCell>{item.pattern}</TableCell>
                 <TableCell>{item.appearTimes}</TableCell>
                 <TableCell>{item.rootCauseAnalysis}</TableCell>
                 <TableCell>{item.suggestion}</TableCell>
                 <TableCell>
                   <Chip
-                    label={item.criticalLevel}
-                    color={levelColor(item.criticalLevel)}
+                    label={item.level}
+                    color={levelColor(item.level)}
                     variant="outlined"
                   />
                 </TableCell>

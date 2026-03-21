@@ -68,9 +68,9 @@ export function ReviewerReportPage() {
 
     try {
       const updated = await updateReviewerReport(item.id, {
-        ownerApproveStatus: item.ownerApproveStatus,
-        appOwnerExplanation: item.appOwnerExplanation,
-        prodAction: item.prodAction,
+        ownerApproveStatus: item.ownerApprovalStatus,
+        appOwnerExplanation: item.ownerExplanation,
+        prodAction: item.actionInHigherEnv,
       });
 
       setItems((current) =>
@@ -98,11 +98,11 @@ export function ReviewerReportPage() {
       items.map((item, index) => [
         index + 1,
         item.id,
-        item.errorPattern,
-        item.lastSeenInUat,
-        item.ownerApproveStatus,
-        item.appOwnerExplanation,
-        item.prodAction,
+        item.pattern,
+        item.lastAppearTime,
+        item.ownerApprovalStatus,
+        item.ownerExplanation,
+        item.actionInHigherEnv,
       ])
     );
   };
@@ -153,16 +153,16 @@ export function ReviewerReportPage() {
               <TableRow key={item.id} hover>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{item.id}</TableCell>
-                <TableCell sx={{ minWidth: 220 }}>{item.errorPattern}</TableCell>
-                <TableCell sx={{ minWidth: 140 }}>{item.lastSeenInUat}</TableCell>
+                <TableCell sx={{ minWidth: 220 }}>{item.pattern}</TableCell>
+                <TableCell sx={{ minWidth: 140 }}>{item.lastAppearTime}</TableCell>
                 <TableCell sx={{ minWidth: 180 }}>
                   <TextField
                     select
-                    value={item.ownerApproveStatus}
+                    value={item.ownerApprovalStatus}
                     onChange={(event) =>
                       handleChange(
                         item.id,
-                        'ownerApproveStatus',
+                        'ownerApprovalStatus',
                         event.target.value as ReviewerApproveStatus
                       )
                     }
@@ -177,9 +177,9 @@ export function ReviewerReportPage() {
                 </TableCell>
                 <TableCell sx={{ minWidth: 260 }}>
                   <TextField
-                    value={item.appOwnerExplanation}
+                    value={item.ownerExplanation}
                     onChange={(event) =>
-                      handleChange(item.id, 'appOwnerExplanation', event.target.value)
+                      handleChange(item.id, 'ownerExplanation', event.target.value)
                     }
                     fullWidth
                     multiline
@@ -188,8 +188,8 @@ export function ReviewerReportPage() {
                 </TableCell>
                 <TableCell sx={{ minWidth: 260 }}>
                   <TextField
-                    value={item.prodAction}
-                    onChange={(event) => handleChange(item.id, 'prodAction', event.target.value)}
+                    value={item.actionInHigherEnv}
+                    onChange={(event) => handleChange(item.id, 'actionInHigherEnv', event.target.value)}
                     fullWidth
                     multiline
                     minRows={2}
