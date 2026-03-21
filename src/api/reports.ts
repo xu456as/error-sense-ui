@@ -26,12 +26,12 @@ export function fetchReviewerReports(filters: ReviewerFilters, signal?: AbortSig
 export function updateReviewerReport(
   id: number,
   payload: {
-    ownerApproveStatus: ReviewerApproveStatus;
-    appOwnerExplanation: string;
-    prodAction: string;
+    ownerApprovalStatus: ReviewerApproveStatus;
+    ownerExplanation: string;
+    actionInHigherEnv: string;
   }
 ) {
-  return apiFetch<ReviewerReportItem>(`/reviewer-reports/${id}`, {
+  return apiFetch<ReviewerReportItem>(`/v1/errsense/report/owner-review/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });

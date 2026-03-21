@@ -1,13 +1,16 @@
 import { ReactNode, createContext, useContext, useMemo, useState } from 'react';
+import { loginWithPassword } from '../api/auth';
+import { setApiToken } from '../api/client';
 
 type User = {
   email: string;
+  token: string;
 };
 
 type AppContextValue = {
   isAuthenticated: boolean;
   user: User | null;
-  login: (email: string) => void;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -20,8 +23,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => ({
       isAuthenticated: Boolean(user),
       user,
-      login: (email: string) => setUser({ email }),
-      logout: () => setUser(null),
+      login: async (email: string, password: string) => {
+        const response = await loginWithPassword(email, password);
+        setApiToken(response.token);
+        setUser({
+          email: response.email,
+          token: response.token,
+        });
+      },
+      logout: () => {
+        setApiToken(null);
+        setUser(null);
+      },
     }),
     [user]
   );

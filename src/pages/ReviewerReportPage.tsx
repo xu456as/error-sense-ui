@@ -68,9 +68,9 @@ export function ReviewerReportPage() {
 
     try {
       const updated = await updateReviewerReport(item.id, {
-        ownerApproveStatus: item.ownerApprovalStatus,
-        appOwnerExplanation: item.ownerExplanation,
-        prodAction: item.actionInHigherEnv,
+        ownerApprovalStatus: item.ownerApprovalStatus,
+        ownerExplanation: item.ownerExplanation,
+        actionInHigherEnv: item.actionInHigherEnv,
       });
 
       setItems((current) =>

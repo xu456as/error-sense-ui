@@ -9,8 +9,9 @@ export function LoginPage() {
   const [email, setEmail] = useState('developer@errsense.io');
   const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!email || !password) {
@@ -18,8 +19,17 @@ export function LoginPage() {
       return;
     }
 
-    login(email);
-    navigate('/developer-report');
+    setSubmitting(true);
+    setError('');
+
+    try {
+      await login(email, password);
+      navigate('/developer-report');
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : 'Login failed');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -70,7 +80,7 @@ export function LoginPage() {
               Sign in
             </Typography>
             <Typography color="text.secondary" sx={{ mb: 3 }}>
-              Use any email and password to enter the local workspace.
+              Use the mock login API to retrieve a token and enter the local workspace.
             </Typography>
             <Box component="form" onSubmit={handleSubmit}>
               <Stack spacing={2.5}>
@@ -89,8 +99,8 @@ export function LoginPage() {
                   onChange={(event) => setPassword(event.target.value)}
                   fullWidth
                 />
-                <Button type="submit" variant="contained" size="large">
-                  Enter dashboard
+                <Button type="submit" variant="contained" size="large" disabled={submitting}>
+                  {submitting ? 'Signing in...' : 'Enter dashboard'}
                 </Button>
               </Stack>
             </Box>
