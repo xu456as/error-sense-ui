@@ -11,7 +11,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
+//    implementation(libs.kotlinx.coroutines.core)
 }
 
 tasks.withType<Test>().configureEach {
