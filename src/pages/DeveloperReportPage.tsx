@@ -11,7 +11,11 @@ import {
   TableHead,
   TableRow,
   TextField,
+  IconButton,
+  Dialog
 } from '@mui/material';
+import ChatIcon from '@mui/icons-material/Chat';
+import ChatBox from '../components/ChatBox';
 import { startTransition, useCallback, useState } from 'react';
 import { fetchDeveloperReports } from '../api/reports';
 import { PageHeader } from '../components/PageHeader';
@@ -69,7 +73,8 @@ export function DeveloperReportPage() {
       setFilters(draftFilters);
     });
   };
-
+  const [selectedRow, setSelectedRow] = useState<DeveloperReportItem | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const handleExport = () => {
     downloadCsv(
       'developer-report.csv',
@@ -84,6 +89,20 @@ export function DeveloperReportPage() {
         item.level,
       ])
     );
+  };
+
+  const handleOpenChat = (row: DeveloperReportItem) => {
+    setSelectedRow(row);
+    setDialogOpen(true);
+  };
+
+  const handleCloseChat = () => {
+    setDialogOpen(false);
+    setSelectedRow(null);
+  };
+   const [chatHistories, setChatHistories] = useState<Map<number, any[]>>(new Map());
+  const saveChatHistory = (rowId: number, messages: any[]) => {
+    setChatHistories(prev => new Map(prev).set(rowId, messages));
   };
 
   return (
@@ -138,6 +157,7 @@ export function DeveloperReportPage() {
               <TableCell>Root Cause Analysis</TableCell>
               <TableCell>Suggestion</TableCell>
               <TableCell>Critical Level</TableCell>
+              <TableCell>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -156,6 +176,14 @@ export function DeveloperReportPage() {
                     variant="outlined"
                   />
                 </TableCell>
+                <TableCell>
+                  <IconButton 
+                    color="primary" 
+                    onClick={() => handleOpenChat(item)}
+                  >
+                    <ChatIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
             {!loading && items.length === 0 ? (
@@ -171,6 +199,31 @@ export function DeveloperReportPage() {
           </TableBody>
         </Table>
       </TableContainer>
+      {/* 统一的 Dialog，但内容根据选中的行变化 */}
+      <Dialog
+        open={dialogOpen}
+        onClose={handleCloseChat}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '80vh',
+            maxHeight: '80vh',
+            borderRadius: 2,
+            overflow: 'hidden'
+          }
+        }}
+      >
+        {selectedRow && (
+          <ChatBox 
+            key={selectedRow.id} // 使用 key 确保切换行时重新挂载组件
+            userId={selectedRow.id}
+            userName={"Tom"}
+            initialMessages={chatHistories.get(selectedRow.id) || []}
+            onMessagesChange={(messages) => saveChatHistory(selectedRow.id, messages)}
+          />
+        )}
+      </Dialog>
     </Stack>
   );
 }

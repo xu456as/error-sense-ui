@@ -7,6 +7,37 @@ import {
 } from '../types/report';
 import { apiFetch } from './client';
 
+const MOCK_ENABLED = true;
+
+const mockReports: DeveloperResponse = {
+  errCases: [
+    {
+      id: 1,
+      pattern: "3345",
+      appearTimes: 10,
+      rootCauseAnalysis: "rootCauseAnalysis",
+      suggestion: "suggestion",
+      level: "High"
+    },
+    {
+      id: 2,
+      pattern: "pattern",
+      appearTimes: 10,
+      rootCauseAnalysis: "rootCauseAnalysis",
+      suggestion: "suggestion",
+      level: "High"
+    },
+    {
+      id: 3,
+      pattern: "p3",
+      appearTimes: 10,
+      rootCauseAnalysis: "rootCauseAnalysis",
+      suggestion: "suggestion",
+      level: "Low"
+    }
+  ]
+};
+
 type DeveloperResponse = {
   errCases: DeveloperReportItem[];
 };
@@ -15,7 +46,12 @@ type ReviewerResponse = {
   errCases: ReviewerReportItem[];
 };
 
-export function fetchDeveloperReports(filters: DeveloperFilters, signal?: AbortSignal) {
+export function fetchDeveloperReports(filters: DeveloperFilters, signal?: AbortSignal): Promise<DeveloperResponse> {
+  if (MOCK_ENABLED) {
+    return new Promise<DeveloperResponse>(resolve => 
+        setTimeout(() => resolve(mockReports), 500)
+    )
+  }
   return apiFetch<DeveloperResponse>('/v1/errsense/report/dev-summary', { params: filters, signal });
 }
 
