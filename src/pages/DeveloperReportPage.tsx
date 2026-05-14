@@ -15,7 +15,8 @@ import {
   Dialog
 } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
-import ChatBox from '../components/ChatBox';
+import GuidedChatBox from '../components/GuidedChatBox';
+// import ChatBox from '../components/ChatBox';
 import { startTransition, useCallback, useState } from 'react';
 import { fetchDeveloperReports } from '../api/reports';
 import { PageHeader } from '../components/PageHeader';
@@ -215,12 +216,30 @@ export function DeveloperReportPage() {
         }}
       >
         {selectedRow && (
-          <ChatBox 
-            key={selectedRow.id} // 使用 key 确保切换行时重新挂载组件
+          // <ChatBox 
+          //   key={selectedRow.id} // 使用 key 确保切换行时重新挂载组件
+          //   userId={selectedRow.id}
+          //   userName={"Tom"}
+          //   initialMessages={chatHistories.get(selectedRow.id) || []}
+          //   onMessagesChange={(messages) => saveChatHistory(selectedRow.id, messages)}
+          // />
+          <GuidedChatBox
+            key={selectedRow.id}
             userId={selectedRow.id}
             userName={"Tom"}
-            initialMessages={chatHistories.get(selectedRow.id) || []}
+            userEmail={"Tom@gmail.com"}
             onMessagesChange={(messages) => saveChatHistory(selectedRow.id, messages)}
+            customActions={{
+              // 自定义动作处理器
+              export_result: async (context, input) => {
+                // 导出结果的逻辑
+                return '导出功能正在开发中...';
+              },
+              export_stats: async (context, input) => {
+                // 导出统计报告
+                return '统计报告已导出到您的下载文件夹';
+              }
+            }}
           />
         )}
       </Dialog>
